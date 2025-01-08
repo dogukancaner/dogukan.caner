@@ -1,0 +1,167 @@
+import { BlogLayout } from "@/components/BlogLayout";
+import { CodeWindow } from "@/components/CodeWindow";
+
+export const meta = {
+  date: "2024-01-09",
+  title: "Next.js use cache: React'ta Performans Optimizasyonunun Yeni Yolu",
+  description:
+    "React ve Next.js dünyasında performans optimizasyonu her zaman önemli bir konu olmuştur. Next.js'in sunduğu yeni use cache direktifi, bu konuda geliştiricilere güçlü bir araç sunuyor. Bu yazıda, use cache direktifini derinlemesine inceleyeceğiz ve gerçek dünya uygulamalarında nasıl kullanabileceğimizi öğreneceğiz.",
+  image:
+    "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  tags: ["React", "Nextjs", "Frontend", "Performance", "Cache"],
+};
+
+export default (props) => <BlogLayout meta={meta} {...props} />;
+
+React ve Next.js dünyasında performans optimizasyonu her zaman önemli bir konu olmuştur. Özellikle büyük ölçekli uygulamalarda, gereksiz render'ların ve API çağrılarının önlenmesi kritik bir öneme sahiptir. Next.js'in sunduğu yeni `use cache` direktifi, tam da bu noktada geliştiricilere güçlü bir çözüm sunuyor.
+
+## use cache Nedir?
+
+`use cache` direktifi, React uygulamalarında hesaplamaları ve veri çağrılarını önbelleğe almanın yeni ve etkili bir yoludur. Bu direktif sayesinde, aynı veriyi kullanan farklı bileşenler için tekrarlanan API çağrıları önlenir ve uygulama performansı optimize edilir.
+
+<CodeWindow title="cache-example.tsx">
+```typescript
+import { cache } from 'react'
+
+// Önbellekleme olmadan:
+async function getUser() {
+const res = await fetch('https://api.example.com/user')
+return res.json()
+}
+
+// use cache ile:
+const getCachedUser = cache(async () => {
+const res = await fetch('https://api.example.com/user')
+return res.json()
+})
+
+````
+</CodeWindow>
+
+## Interleaving: use cache'in Sihirli Yanı
+
+`use cache`'in en güçlü özelliklerinden biri, iç içe geçmiş (interleaved) render işlemlerini optimize edebilmesidir. Bu özellik, aynı veriyi kullanan farklı bileşenlerin performansını önemli ölçüde artırır.
+
+<CodeWindow title="interleaving-example.tsx">
+```typescript
+// components/Header.js
+async function Header() {
+  const user = await getCachedUser()
+  return <h1>Hoş geldin, {user.name}</h1>
+}
+
+// components/Cart.js
+async function Cart() {
+  const user = await getCachedUser()
+  return <div>Sepetiniz: {user.cartItems.length} ürün</div>
+}
+
+// app/page.js
+export default function Page() {
+  return (
+    <>
+      <Header />
+      <Cart />
+    </>
+  )
+}
+````
+
+</CodeWindow>
+
+## Best Practices ve Örnek Senaryolar
+
+### 1. Granüler Cache Kullanımı
+
+Cache fonksiyonlarını mümkün olduğunca spesifik ve granüler tutmak önemlidir:
+
+<CodeWindow title="best-practices.tsx">
+```typescript
+// ✅ Doğru: Spesifik cache fonksiyonları
+const getUser = cache(async () => /* ... */)
+const getPosts = cache(async () => /* ... */)
+const getComments = cache(async () => /* ... */)
+
+// ❌ Yanlış: Çok geniş kapsamlı cache
+const getAllData = cache(async () => {
+return {
+user: await getUser(),
+posts: await getPosts(),
+comments: await getComments()
+}
+})
+
+````
+</CodeWindow>
+
+### 2. Hata Yönetimi
+
+Cache fonksiyonlarında hata yönetimi önemlidir:
+
+<CodeWindow title="error-handling.tsx">
+```typescript
+const getCachedData = cache(async () => {
+  try {
+    const res = await fetch('/api/data')
+    if (!res.ok) {
+      throw new Error('Veri çekilemedi')
+    }
+    return res.json()
+  } catch (error) {
+    console.error('Cache hatası:', error)
+    throw error
+  }
+})
+````
+
+</CodeWindow>
+
+## Gerçek Dünya Örneği: E-ticaret Uygulaması
+
+Bir e-ticaret uygulamasında `use cache`'in nasıl kullanılabileceğini görelim:
+
+<CodeWindow title="e-commerce-example.tsx">
+```typescript
+// lib/cache.js
+const getProductDetails = cache(async (productId) => {
+  const res = await fetch(`/api/products/${productId}`)
+  return res.json()
+})
+
+const getProductReviews = cache(async (productId) => {
+const res = await fetch(`/api/products/${productId}/reviews`)
+return res.json()
+})
+
+// app/products/[id]/page.js
+export default async function ProductPage({ params }) {
+const [product, reviews] = await Promise.all([
+getProductDetails(params.id),
+getProductReviews(params.id)
+])
+
+return (
+
+<div>
+  <ProductHeader product={product} />
+  <ProductReviews reviews={reviews} />
+</div>
+) }
+
+```
+</CodeWindow>
+
+## Dikkat Edilmesi Gerekenler
+
+1. **Server-Side Kullanım**: `use cache` sadece server-side kod için kullanılabilir.
+2. **Dinamik Veri**: Real-time veri gerektiren durumlarda dikkatli kullanılmalıdır.
+3. **Memory Yönetimi**: Büyük veri setlerinde cache stratejisi iyi planlanmalıdır.
+
+## Sonuç
+
+Next.js'in `use cache` direktifi, modern web uygulamalarında performans optimizasyonu için güçlü bir araç sunuyor. Özellikle büyük ölçekli uygulamalarda ve mikroservis mimarilerinde, doğru kullanıldığında önemli performans iyileştirmeleri sağlayabilir.
+
+Ancak her güçlü özellik gibi, bunu da doğru yerde ve doğru şekilde kullanmak önemlidir. Test edin, ölçün ve uygulamanızın ihtiyaçlarına göre optimize edin!
+
+Happy coding! 🚀
+```
