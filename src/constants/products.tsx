@@ -3,6 +3,9 @@ import temax2 from "public/images/temax-2.png";
 import temax3 from "public/images/temax-3.png";
 import otelDetay1 from "public/images/otel-detay-1.png";
 import otelDetay2 from "public/images/otel-detay-2.png";
+import taskboard1 from "public/images/taskboard-1.png";
+import taskboard2 from "public/images/taskboard-2.png";
+import taskboard3 from "public/images/taskboard-3.png";
 import github1 from "public/images/github-1.png";
 import github2 from "public/images/github-2.png";
 
@@ -34,6 +37,21 @@ export const products = [
     content: (
       <div>
         <p>The website was created using jQuery, Bootstrap.</p>
+      </div>
+    ),
+  },
+  {
+    href: "https://task-board-liart.vercel.app/",
+    title: "Task Board",
+    description:
+      "This application shows the searched user's information using the Github API. The github profile of the searched person appears and relevant information is displayed.",
+    thumbnail: taskboard1,
+    images: [taskboard1, taskboard2, taskboard3],
+    stack: ["Nextjs", "Tailwindcss"],
+    slug: "taskboard",
+    content: (
+      <div>
+        <p>The website was created using React, TailwindCSS.</p>
       </div>
     ),
   },
