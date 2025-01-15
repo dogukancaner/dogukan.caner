@@ -44,7 +44,7 @@ export const products = [
     href: "https://task-board-liart.vercel.app/",
     title: "Task Board",
     description:
-      "This application shows the searched user's information using the Github API. The github profile of the searched person appears and relevant information is displayed.",
+      "Modern bir task yönetim uygulaması olan Kanban Board projesi, React ve TypeScript kullanılarak geliştirilmiştir. Sürükle-bırak özelliği ile kolay task yönetimi sağlar.",
     thumbnail: taskboard1,
     images: [taskboard1, taskboard2, taskboard3],
     stack: ["Nextjs", "Tailwindcss"],
