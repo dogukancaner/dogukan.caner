@@ -3,7 +3,8 @@ import { CodeWindow } from "@/components/CodeWindow";
 
 export const meta = {
   date: "2024-01-09",
-  title: "Next.js use cache: React'ta Performans Optimizasyonunun Yeni Yolu",
+  title:
+    "Next.js'de use-cache ile Performansı Artırmanın Sırları: Daha Hızlı, Daha Verimli Uygulamalar",
   description:
     "React ve Next.js dünyasında performans optimizasyonu her zaman önemli bir konu olmuştur. Next.js'in sunduğu yeni use cache direktifi, bu konuda geliştiricilere güçlü bir araç sunuyor. Bu yazıda, use cache direktifini derinlemesine inceleyeceğiz ve gerçek dünya uygulamalarında nasıl kullanabileceğimizi öğreneceğiz.",
   image:
@@ -13,155 +14,283 @@ export const meta = {
 
 export default (props) => <BlogLayout meta={meta} {...props} />;
 
-React ve Next.js dünyasında performans optimizasyonu her zaman önemli bir konu olmuştur. Özellikle büyük ölçekli uygulamalarda, gereksiz render'ların ve API çağrılarının önlenmesi kritik bir öneme sahiptir. Next.js'in sunduğu yeni `use cache` direktifi, tam da bu noktada geliştiricilere güçlü bir çözüm sunuyor.
+Next.js, modern web uygulamaları geliştirmek için sunduğu güçlü özellikler ve araçlarla geliştiricilerin en çok tercih ettiği framework'lerden biri haline geldi. Özellikle performans optimizasyonu konusunda sağladığı esneklik ve kontrol, Next.js'i öne çıkarıyor. Bu yazıda, Next.js'in use-cache direktifini derinlemesine inceleyecek, bu özelliğin nasıl çalıştığını, hangi senaryolarda kullanılabileceğini ve performans optimizasyonu için nasıl etkili bir şekilde kullanılabileceğini ele alacağız.
 
-## use cache Nedir?
+## use-cache Direktifi Nedir ve Neden Önemlidir?
 
-`use cache` direktifi, React uygulamalarında hesaplamaları ve veri çağrılarını önbelleğe almanın yeni ve etkili bir yoludur. Bu direktif sayesinde, aynı veriyi kullanan farklı bileşenler için tekrarlanan API çağrıları önlenir ve uygulama performansı optimize edilir.
+use-cache, Next.js'in App Router ile birlikte gelen bir özelliktir. Bu direktif, veri çekme işlemlerinin sonuçlarını önbelleğe alarak, aynı işlemin tekrar tekrar yapılmasını engeller. Bu sayede, hem sunucu tarafında gereksiz yük oluşması önlenir hem de kullanıcı tarafında daha hızlı bir deneyim sunulur.
 
-<CodeWindow title="cache-example.tsx">
+Özellikle büyük ölçekli uygulamalarda, veri çekme işlemleri sıklıkla tekrarlanır ve bu işlemler sunucu tarafında önemli bir yük oluşturabilir. use-cache direktifi, bu tür durumlarda devreye girerek, aynı veriyi tekrar tekrar çekmek yerine önbellekten hızlı bir şekilde sunar.
+
+## use-cache Nasıl Çalışır?
+
+Next.js'de use-cache direktifi, genellikle fetch işlemleri sırasında kullanılır. İşte temel bir örnek:
+
+<CodeWindow>
 ```typescript
-import { cache } from 'react'
-
-// Önbellekleme olmadan:
-async function getUser() {
-const res = await fetch('https://api.example.com/user')
-return res.json()
+interface Data {
+  id: number;
+  title: string;
+  content: string;
 }
 
-// use cache ile:
-const getCachedUser = cache(async () => {
-const res = await fetch('https://api.example.com/user')
-return res.json()
-})
+async function getData(): Promise<Data[]> {
+'use cache';
 
-````
-</CodeWindow>
+try {
+const res = await fetch('https://api.example.com/data');
 
-## Interleaving: use cache'in Sihirli Yanı
-
-`use cache`'in en güçlü özelliklerinden biri, iç içe geçmiş (interleaved) render işlemlerini optimize edebilmesidir. Bu özellik, aynı veriyi kullanan farklı bileşenlerin performansını önemli ölçüde artırır.
-
-<CodeWindow title="interleaving-example.tsx">
-```typescript
-// components/Header.js
-async function Header() {
-  const user = await getCachedUser()
-  return <h1>Hoş geldin, {user.name}</h1>
-}
-
-// components/Cart.js
-async function Cart() {
-  const user = await getCachedUser()
-  return <div>Sepetiniz: {user.cartItems.length} ürün</div>
-}
-
-// app/page.js
-export default function Page() {
-  return (
-    <>
-      <Header />
-      <Cart />
-    </>
-  )
-}
-````
-
-</CodeWindow>
-
-## Best Practices ve Örnek Senaryolar
-
-### 1. Granüler Cache Kullanımı
-
-Cache fonksiyonlarını mümkün olduğunca spesifik ve granüler tutmak önemlidir:
-
-<CodeWindow title="best-practices.tsx">
-```typescript
-// ✅ Doğru: Spesifik cache fonksiyonları
-const getUser = cache(async () => /* ... */)
-const getPosts = cache(async () => /* ... */)
-const getComments = cache(async () => /* ... */)
-
-// ❌ Yanlış: Çok geniş kapsamlı cache
-const getAllData = cache(async () => {
-return {
-user: await getUser(),
-posts: await getPosts(),
-comments: await getComments()
-}
-})
-
-````
-</CodeWindow>
-
-### 2. Hata Yönetimi
-
-Cache fonksiyonlarında hata yönetimi önemlidir:
-
-<CodeWindow title="error-handling.tsx">
-```typescript
-const getCachedData = cache(async () => {
-  try {
-    const res = await fetch('/api/data')
     if (!res.ok) {
-      throw new Error('Veri çekilemedi')
+      throw new Error('Veri çekme işlemi başarısız oldu.');
     }
-    return res.json()
-  } catch (error) {
-    console.error('Cache hatası:', error)
-    throw error
-  }
-})
-````
 
+    return res.json();
+
+} catch (error) {
+console.error('Veri çekme hatası:', error);
+throw error;
+}
+}
+
+export default async function Page() {
+  const data = await getData();
+  
+  return (
+    <div>
+      <h1>Veriler</h1>
+      <ul>
+        {data.map((item) => (
+          <li key={item.id}>
+            <h2>{item.title}</h2>
+            <p>{item.content}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
 </CodeWindow>
 
-## Gerçek Dünya Örneği: E-ticaret Uygulaması
+## Önbellek Süresini Ayarlama (Revalidation)
 
-Bir e-ticaret uygulamasında `use cache`'in nasıl kullanılabileceğini görelim:
+Önbellek süresini ayarlamak için revalidate seçeneğini kullanabilirsiniz:
 
-<CodeWindow title="e-commerce-example.tsx">
+<CodeWindow>
 ```typescript
-// lib/cache.js
-const getProductDetails = cache(async (productId) => {
-  const res = await fetch(`/api/products/${productId}`)
-  return res.json()
-})
+async function getData(): Promise<Data[]> {
+  'use cache';
+  
+  try {
+    const res = await fetch('https://api.example.com/data', {
+      next: { revalidate: 60 } // 60 saniye sonra önbelleği yenile
+    });
+    
+    if (!res.ok) {
+      throw new Error('Veri çekme işlemi başarısız oldu.');
+    }
+    
+    return res.json();
+  } catch (error) {
+    console.error('Veri çekme hatası:', error);
+    throw error;
+  }
+}
+```
+</CodeWindow>
 
-const getProductReviews = cache(async (productId) => {
-const res = await fetch(`/api/products/${productId}/reviews`)
-return res.json()
-})
+## Önbelleği Devre Dışı Bırakma
 
-// app/products/[id]/page.js
-export default async function ProductPage({ params }) {
-const [product, reviews] = await Promise.all([
-getProductDetails(params.id),
-getProductReviews(params.id)
-])
+Bazı durumlarda önbelleği devre dışı bırakmak isteyebilirsiniz:
+
+<CodeWindow>
+```typescript
+async function getData(): Promise<Data[]> {
+  'use cache';
+  
+  try {
+    const res = await fetch('https://api.example.com/data', {
+      cache: 'no-store' // Önbelleği devre dışı bırak
+    });
+    
+    if (!res.ok) {
+      throw new Error('Veri çekme işlemi başarısız oldu.');
+    }
+    
+    return res.json();
+  } catch (error) {
+    console.error('Veri çekme hatası:', error);
+    throw error;
+  }
+}
+```
+</CodeWindow>
+
+## İç İçe Kullanım (Interleaving)
+
+Farklı veri kaynaklarını birleştirme örneği:
+
+<CodeWindow>
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+interface Post {
+id: number;
+title: string;
+content: string;
+userId: number;
+}
+
+async function getUsers(): Promise<User[]> {
+'use cache';
+
+try {
+const res = await fetch('https://api.example.com/users');
+if (!res.ok) {
+throw new Error('Kullanıcı verileri çekme işlemi başarısız oldu.');
+}
+return res.json();
+} catch (error) {
+console.error('Kullanıcı verileri çekme hatası:', error);
+throw error;
+}
+}
+
+async function getPosts(): Promise<Post[]> {
+'use cache';
+
+try {
+const res = await fetch('https://api.example.com/posts');
+if (!res.ok) {
+throw new Error('Gönderi verileri çekme işlemi başarısız oldu.');
+}
+return res.json();
+} catch (error) {
+console.error('Gönderi verileri çekme hatası:', error);
+throw error;
+}
+}
+
+export default async function Page() {
+  const [users, posts] = await Promise.all([getUsers(), getPosts()]);
+
+const usersWithPosts = users.map((user) => ({
+...user,
+posts: posts.filter((post) => post.userId === user.id),
+}));
 
 return (
 
 <div>
-  <ProductHeader product={product} />
-  <ProductReviews reviews={reviews} />
+  <h1>Kullanıcılar ve Gönderiler</h1>
+  <ul>
+    {usersWithPosts.map((user) => (
+      <li key={user.id}>
+        <h2>{user.name}</h2>
+        <ul>
+          {user.posts.map((post) => (
+            <li key={post.id}>
+              <h3>{post.title}</h3>
+              <p>{post.content}</p>
+            </li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
 </div>
-) }
+); }
+
+````
+</CodeWindow>
+
+## Gerçek Dünya Senaryoları
+
+### E-ticaret Sitesi Örneği
+
+<CodeWindow>
+```typescript
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  stock: number;
+}
+
+async function getProducts(): Promise<Product[]> {
+  'use cache';
+
+  try {
+    const res = await fetch('https://api.example.com/products', {
+      next: { revalidate: 3600 } // 1 saat sonra önbelleği yenile
+    });
+
+    if (!res.ok) {
+      throw new Error('Ürün verileri çekme işlemi başarısız oldu.');
+    }
+
+    return res.json();
+  } catch (error) {
+    console.error('Ürün verileri çekme hatası:', error);
+    throw error;
+  }
+}
+````
+
+</CodeWindow>
+
+### Haber Portalı Örneği
+
+<CodeWindow>
+```typescript
+interface News {
+  id: number;
+  title: string;
+  summary: string;
+  publishDate: string;
+}
+
+async function getNews(): Promise<News[]> {
+'use cache';
+
+try {
+const res = await fetch('https://api.example.com/news', {
+next: { revalidate: 600 } // 10 dakika sonra önbelleği yenile
+});
+
+    if (!res.ok) {
+      throw new Error('Haber verileri çekme işlemi başarısız oldu.');
+    }
+
+    return res.json();
+
+} catch (error) {
+console.error('Haber verileri çekme hatası:', error);
+throw error;
+}
+}
 
 ```
 </CodeWindow>
 
+## use-cache Kullanmanın Avantajları
+
+1. **Performans Artışı**: Önbellek kullanarak veri çekme işlemlerini hızlandırır.
+2. **Sunucu Yükünü Azaltma**: Tekrarlanan istekleri önler.
+3. **Kullanıcı Deneyimini İyileştirme**: Daha hızlı sayfa yüklemeleri sağlar.
+4. **Maliyet Optimizasyonu**: Sunucu kaynaklarını daha verimli kullanır.
+
 ## Dikkat Edilmesi Gerekenler
 
-1. **Server-Side Kullanım**: `use cache` sadece server-side kod için kullanılabilir.
-2. **Dinamik Veri**: Real-time veri gerektiren durumlarda dikkatli kullanılmalıdır.
-3. **Memory Yönetimi**: Büyük veri setlerinde cache stratejisi iyi planlanmalıdır.
+1. **Önbellek Stratejisi**: Verinin güncellik ihtiyacına göre doğru revalidation süresi belirlenmeli.
+2. **Önbellek Boyutu**: Büyük veri setlerinde bellek kullanımına dikkat edilmeli.
+3. **Güvenlik**: Hassas verilerin önbelleklenmesi konusunda dikkatli olunmalı.
 
 ## Sonuç
 
-Next.js'in `use cache` direktifi, modern web uygulamalarında performans optimizasyonu için güçlü bir araç sunuyor. Özellikle büyük ölçekli uygulamalarda ve mikroservis mimarilerinde, doğru kullanıldığında önemli performans iyileştirmeleri sağlayabilir.
-
-Ancak her güçlü özellik gibi, bunu da doğru yerde ve doğru şekilde kullanmak önemlidir. Test edin, ölçün ve uygulamanızın ihtiyaçlarına göre optimize edin!
-
-Happy coding! 🚀
+Next.js'in use-cache direktifi, modern web uygulamalarında performans optimizasyonu için güçlü bir araç sunmaktadır. Doğru kullanıldığında, hem kullanıcı deneyimini iyileştirir hem de sunucu kaynaklarını optimize eder. Projelerinizde bu özelliği kullanarak, uygulamalarınızın performansını üst seviyeye taşıyabilirsiniz.
 ```
