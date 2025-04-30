@@ -44,7 +44,7 @@ export const products = [
     href: "https://task-board-liart.vercel.app/",
     title: "Task Board",
     description:
-      "Modern bir task yönetim uygulaması olan Kanban Board projesi, Next.js ve TailwindCSS kullanılarak geliştirilmiştir. Sürükle-bırak özelliği ile kolay task yönetimi sağlar.",
+      "Kanban Board project, a modern task management application, is developed using Next.js and TailwindCSS. It provides easy task management with drag-and-drop feature.",
     thumbnail: taskboard1,
     images: [taskboard1, taskboard2, taskboard3],
     stack: ["Nextjs", "Tailwindcss"],

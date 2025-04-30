@@ -1,5 +1,16 @@
 export const timeline = [
   {
+    company: "Salute Group",
+    title: "Frontend Developer",
+    date: "Feb 2025 - Present",
+    description:
+      "To build the company's new product, the QR menu management system (QRFine), and to develop the websites of the company's businesses.",
+    responsibilities: [
+      "Worked on refining system design to improve scalability and performance, aligning with the needs of large-scale applications.",
+      "Ensured data flow and system consistency through RESTful API integrations.",
+    ],
+  },
+  {
     company: "otelfiyat.com",
     title: "Frontend Developer",
     date: "Mar 2023 - Sep 2024",
@@ -20,7 +31,7 @@ export const timeline = [
     date: " Jan 2022 - May 2022",
     description: "",
     responsibilities: [
-      "•I was responsible for designing and implementing user interfaces of web applications. I have done the necessary work to make it user-friendly and work correctly.",
+      "I was responsible for designing and implementing user interfaces of web applications. I have done the necessary work to make it user-friendly and work correctly.",
       "Multiple interactive pages have been developed in the React framework to develop responsive and mobile-friendly pages.",
       "Page speeds were optimized by correcting unnecessary code stacks, incorrect and faulty codes on the developed pages, and lessened style files.",
       "I gained valuable experience by working with the experienced team. I learned new technologies and new applications.",
